@@ -1,4 +1,4 @@
-package imgur.restapitest;
+package ru.geekbrains.autotest;
 
 import java.io.FileInputStream;
 import java.io.IOException;

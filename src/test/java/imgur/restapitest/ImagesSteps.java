@@ -1,88 +1,74 @@
 package imgur.restapitest;
 
 import io.qameta.allure.Step;
-import io.restassured.response.Response;
+import ru.geekbrains.autotest.dto.response.GetImageInfoResponse;
+import ru.geekbrains.autotest.dto.response.UpdateOrDeleteImageResponse;
+import ru.geekbrains.autotest.dto.response.UploadImageResponse;
 
-import java.util.Map;
-
+import static imgur.restapitest.ImagesTests.*;
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.*;
+import static ru.geekbrains.autotest.utils.Endpoints.IMAGE;
+import static ru.geekbrains.autotest.utils.Endpoints.UPLOAD_IMAGE;
 
 public class ImagesSteps {
 
-    @Step("POST Image upload on path {0} and get response")
-    public static Response uploadImage(String path, Map<String, String> headers, String encodedImage) {
+    @Step("POST Image upload and get response")
+    public static UploadImageResponse uploadImage() {
         return given()
-                .headers(headers)
-                .multiPart("image", encodedImage)
-                .multiPart("type", "base64")
-                .multiPart("title", "Title will be change")
-                .multiPart("description", "This is description should change")
+                .spec(requestSpecificationWithAuthAndMultipartImage)
                 .log().all()
                 .expect()
-                .body("success", is(true))
-                .body("data.id", is(matchesPattern("[\\w\\d]{7}")))
-                .body("data.deletehash", is(matchesPattern("[\\w\\d]{15}")))
+                .spec(positiveResponseSpecificationForUploadImage)
                 .when()
-                .post(path)
+                .post(UPLOAD_IMAGE)
                 .prettyPeek()
                 .then()
-                .statusCode(200)
                 .extract()
-                .response();
+                .body().as(UploadImageResponse.class);
     }
 
-    @Step("GET Image info with ID:{0}")
-    public static Response getImageInfo(String myImageId, Map<String, String> headers, String myImageDescription,
-                                        String myImageTitle, String imageType) {
+    @Step("GET Image info with ID={0}")
+    public static GetImageInfoResponse getImageInfo(String myImageId) {
         return given()
-                .headers(headers)
+                .spec(requestSpecificationWithAuth)
                 .log().all()
                 .expect()
-                .body("data.description", is(myImageDescription))
-                .body("data.title", is(myImageTitle))
-                .body("data.type", is(imageType))
+                .spec(positiveResponseSpecification)
                 .when()
-                .get("https://api.imgur.com/3/image/{myImageId}", myImageId)
+                .get(IMAGE, myImageId)
                 .prettyPeek()
                 .then()
-                .statusCode(200)
                 .extract()
-                .response();
+                .body().as(GetImageInfoResponse.class);
     }
 
-    @Step("POST Update image with ID:{0} and get update status response")
-    public static void updateImage(String myImageId, Map<String, String> headers, String newTitle,
-                                   String newDescription) {
-        given()
-                .headers(headers)
-                .multiPart("title", newTitle)
-                .multiPart("description", newDescription)
+    @Step("POST Update image with ID={0} and get update status response")
+    public static UpdateOrDeleteImageResponse updateImage(String myImageId) {
+        return given()
+                .spec(requestSpecificationWithNewInfo)
                 .log().all()
                 .expect()
-                .body("data", is(true))
-                .body("success", is(true))
-                .body("status", is(200))
+                .spec(positiveResponseSpecification)
                 .when()
-                .post("https://api.imgur.com/3/image/{myImageId}", myImageId)
+                .post(IMAGE, myImageId)
                 .prettyPeek()
                 .then()
-                .statusCode(200);
+                .extract()
+                .body().as(UpdateOrDeleteImageResponse.class);
     }
 
-    @Step("DELETE image with ID:{0} and get delete status response")
-    public static void deleteImage(String myImageId, Map<String, String> headers) {
-        given()
-                .headers(headers)
+    @Step("DELETE image with ID={0} and get delete status response")
+    public static UpdateOrDeleteImageResponse deleteImage(String myImageId) {
+        return given()
+                .spec(requestSpecificationWithNewInfo)
                 .log().all()
                 .expect()
-                .body("data", is(true))
-                .body("success", is(true))
-                .body("status", is(200))
+                .spec(positiveResponseSpecification)
                 .when()
-                .delete("https://api.imgur.com/3/image/{myImageId}", myImageId)
+                .delete(IMAGE, myImageId)
                 .prettyPeek()
                 .then()
-                .statusCode(200);
+                .extract()
+                .body().as(UpdateOrDeleteImageResponse.class);
     }
 }

@@ -1,4 +1,4 @@
-package ru.geekbrains.autotest;
+package ru.geekbrains.autotest.utils;
 
 import java.io.FileInputStream;
 import java.io.IOException;

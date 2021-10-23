@@ -11,7 +11,7 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import org.junit.jupiter.api.*;
 import ru.geekbrains.autotest.dto.response.GetImageInfoResponse;
-import ru.geekbrains.autotest.dto.response.UpdateOrDeleteImageResponse;
+import ru.geekbrains.autotest.dto.response.CommonResponseWithBooleanData;
 import ru.geekbrains.autotest.dto.response.UploadImageResponse;
 
 import java.io.File;
@@ -25,7 +25,7 @@ import static org.hamcrest.Matchers.*;
 @Tag("ImageTests")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ImagesTests extends BaseTest{
-    private final String PATH_TO_IMAGE = "src/test/resources/test_image.jpeg";
+    private final static String PATH_TO_IMAGE = "src/test/resources/test_image.jpeg";
     static String myImageId;
     static String myImageDeleteHash;
     static String myImageTitle = "Title will be change";
@@ -35,10 +35,10 @@ public class ImagesTests extends BaseTest{
     static RequestSpecification requestSpecificationWithAuthAndMultipartImage;
     static RequestSpecification requestSpecificationWithNewInfo;
     static ResponseSpecification positiveResponseSpecificationForUploadImage;
-    MultiPartSpecification multiPartSpecWithFile;
+    static MultiPartSpecification multiPartSpecWithFile;
 
-    @BeforeEach
-    void setUp() {
+    @BeforeAll
+    static void setUp() {
         multiPartSpecWithFile = new MultiPartSpecBuilder(new File(PATH_TO_IMAGE))
                 .controlName("image")
                 .build();
@@ -96,7 +96,7 @@ public class ImagesTests extends BaseTest{
     @Description("That test doing sending updated image info and getting response with update status")
     @Tag("ImageUpdateTest")
     void imageUpdateTest() {
-        UpdateOrDeleteImageResponse updateImageResponse = ImagesSteps.updateImage(myImageId);
+        CommonResponseWithBooleanData updateImageResponse = ImagesSteps.updateImage(myImageId);
         Assertions.assertTrue(updateImageResponse.getData());
     }
 
@@ -106,7 +106,7 @@ public class ImagesTests extends BaseTest{
     @Description("That test sending request for deletion and getting response with delete status")
     @Tag("ImageDeleteTest")
     void imageDeleteTest() {
-        UpdateOrDeleteImageResponse deleteImageResponse = ImagesSteps.deleteImage(myImageId);
+        CommonResponseWithBooleanData deleteImageResponse = ImagesSteps.deleteImage(myImageId);
         Assertions.assertTrue(deleteImageResponse.getData());
     }
 

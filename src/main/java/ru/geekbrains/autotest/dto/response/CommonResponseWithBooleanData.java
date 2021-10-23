@@ -5,5 +5,5 @@ import lombok.Data;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
-public class UpdateOrDeleteImageResponse extends CommonResponse<Boolean>{
+public class CommonResponseWithBooleanData extends CommonResponse<Boolean>{
 }

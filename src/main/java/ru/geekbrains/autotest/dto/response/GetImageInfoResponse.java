@@ -102,25 +102,4 @@ public class GetImageInfoResponse extends CommonResponse<GetImageInfoResponse.Im
         private AdConfig adConfig;
     }
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonPropertyOrder({
-            "safeFlags",
-            "highRiskFlags",
-            "unsafeFlags",
-            "wallUnsafeFlags",
-            "showsAds"
-    })
-    @Data
-    public static class AdConfig {
-        @JsonProperty("safeFlags")
-        private List<String> safeFlags = null;
-        @JsonProperty("highRiskFlags")
-        private List<Object> highRiskFlags = null;
-        @JsonProperty("unsafeFlags")
-        private List<String> unsafeFlags = null;
-        @JsonProperty("wallUnsafeFlags")
-        private List<Object> wallUnsafeFlags = null;
-        @JsonProperty("showsAds")
-        private Boolean showsAds;
-    }
 }

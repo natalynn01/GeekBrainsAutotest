@@ -2,7 +2,7 @@ package imgur.restapitest;
 
 import io.qameta.allure.Step;
 import ru.geekbrains.autotest.dto.response.GetImageInfoResponse;
-import ru.geekbrains.autotest.dto.response.UpdateOrDeleteImageResponse;
+import ru.geekbrains.autotest.dto.response.CommonResponseWithBooleanData;
 import ru.geekbrains.autotest.dto.response.UploadImageResponse;
 
 import static imgur.restapitest.ImagesTests.*;
@@ -43,7 +43,7 @@ public class ImagesSteps {
     }
 
     @Step("POST Update image with ID={0} and get update status response")
-    public static UpdateOrDeleteImageResponse updateImage(String myImageId) {
+    public static CommonResponseWithBooleanData updateImage(String myImageId) {
         return given()
                 .spec(requestSpecificationWithNewInfo)
                 .log().all()
@@ -54,11 +54,11 @@ public class ImagesSteps {
                 .prettyPeek()
                 .then()
                 .extract()
-                .body().as(UpdateOrDeleteImageResponse.class);
+                .body().as(CommonResponseWithBooleanData.class);
     }
 
     @Step("DELETE image with ID={0} and get delete status response")
-    public static UpdateOrDeleteImageResponse deleteImage(String myImageId) {
+    public static CommonResponseWithBooleanData deleteImage(String myImageId) {
         return given()
                 .spec(requestSpecificationWithNewInfo)
                 .log().all()
@@ -69,6 +69,6 @@ public class ImagesSteps {
                 .prettyPeek()
                 .then()
                 .extract()
-                .body().as(UpdateOrDeleteImageResponse.class);
+                .body().as(CommonResponseWithBooleanData.class);
     }
 }

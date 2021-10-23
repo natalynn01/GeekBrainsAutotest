@@ -1,119 +1,106 @@
 package imgur.restapitest;
 
 import io.qameta.allure.Step;
-import io.restassured.response.Response;
+import ru.geekbrains.autotest.dto.response.CommonResponseWithBooleanData;
+import ru.geekbrains.autotest.dto.response.CreateAlbumResponse;
+import ru.geekbrains.autotest.dto.response.ErrorResponse;
+import ru.geekbrains.autotest.dto.response.GetAlbumResponse;
 
-import java.util.Map;
-
+import static imgur.restapitest.AlbumTest.*;
+import static imgur.restapitest.BaseTest.positiveResponseSpecification;
+import static imgur.restapitest.BaseTest.requestSpecificationWithAuth;
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.matchesPattern;
+import static ru.geekbrains.autotest.utils.Endpoints.*;
 
 public class AlbumSteps {
 
     @Step("POST Album create and get response")
-    public static Response createAlbum(Map<String, String> headers, String myAlbumTitle, String myAlbumDescription) {
+    public static CreateAlbumResponse createAlbum() {
         return given()
-                .headers(headers)
-                .multiPart("title", myAlbumTitle)
-                .multiPart("description", myAlbumDescription)
+                .spec(requestSpecificationForCreateAlbum)
                 .log().all()
                 .expect()
-                .body("success", is(true))
-                .body("status", is(200))
-                .body("data.id", is(matchesPattern("[\\w\\d]{7}")))
-                .body("data.deletehash", is(matchesPattern("[\\w\\d]{15}")))
+                .spec(positiveResponseSpecificationForCreateAlbum)
                 .when()
-                .post("https://api.imgur.com/3/album")
+                .post(ALBUM)
                 .prettyPeek()
                 .then()
-                .statusCode(200)
                 .extract()
-                .response();
+                .body().as(CreateAlbumResponse.class);
     }
 
-    @Step("GET Info album with ID: \"{1}\" and check response fields")
-    public static void getAlbumInfo(Map<String, String> headers, String myAlbumId, String username) {
-        given()
-                .headers(headers)
+    @Step("GET Info album with ID: \"{0}\" and check response fields")
+    public static GetAlbumResponse getAlbumInfo(String myAlbumId) {
+        return given()
+                .spec(requestSpecificationWithAuth)
                 .log().all()
                 .expect()
-                .body("data.id", is(myAlbumId))
-                .body("data.account_url", is(username))
-                .body("data.privacy", is("hidden"))
+                .spec(positiveResponseSpecification)
                 .when()
-                .get("https://api.imgur.com/3/album/{myAlbumId}", myAlbumId)
+                .get(ALBUM_INFO, myAlbumId)
                 .prettyPeek()
                 .then()
-                .statusCode(200);
+                .extract()
+                .body().as(GetAlbumResponse.class);
     }
 
-    @Step("POST Add to album with ID: \"{1}\" inexistent image")
-    public static void addInexistingImage(Map<String, String> headers, String myAlbumId) {
-        given()
-                .headers(headers)
-                .multiPart("ids[]","inexistentId")
+    @Step("POST Add to album with ID: \"{0}\" non existing image")
+    public static ErrorResponse addNonExistingImage(String myAlbumId) {
+        return given()
+                .spec(requestSpecificationForAddNonExistingImage)
                 .log().all()
                 .expect()
-                .body("data.error", is("You must own all the image ids to add them to album " + myAlbumId))
-                .body("data.request", is("/3/album/" + myAlbumId + "/add"))
-                .body("data.method", is("POST"))
-                .body("success", is(false))
-                .body("status", is(403))
+                .spec(errorResponseSpecificationForPostImage)
                 .when()
-                .post("https://api.imgur.com/3/album/{myAlbumId}/add", myAlbumId)
+                .post(ALBUM_ADD_NEW_IMAGE, myAlbumId)
                 .prettyPeek()
                 .then()
-                .statusCode(403);
+                .extract()
+                .body().as(ErrorResponse.class);
     }
 
-    @Step("GET From album with ID: \"{1}\" inexisted image")
-    public static void getInexistingImage(Map<String, String> headers, String myAlbumId) {
-        given()
-                .headers(headers)
+    @Step("GET From album with ID: \"{0}\" non existing image with ID: \"{1}\"")
+    public static ErrorResponse getNonExistingImage(String myAlbumId, String imageId) {
+        return given()
+                .spec(requestSpecificationWithAuth)
                 .log().all()
                 .expect()
-                .body("data.error", is("Unable to find an image with the id, inexistedId"))
-                .body("data.request", is("/3/album/" + myAlbumId + "/image/inexistedId"))
-                .body("data.method", is("GET"))
-                .body("success", is(true))
-                .body("status", is(200))
+                .spec(errorResponseSpecificationForGetImage)
                 .when()
-                .get("https://api.imgur.com/3/album/{myAlbumId}/image/inexistedId", myAlbumId)
+                .get(IMAGE_FROM_ALBUM, myAlbumId, imageId)
                 .prettyPeek()
                 .then()
-                .statusCode(200);
+                .extract()
+                .body().as(ErrorResponse.class);
     }
 
-    @Step("PUT To album with ID: \"{1}\" updated parameters")
-    public static void putUpdatedParams(Map<String, String> headers, String myAlbumId) {
-        given()
-                .headers(headers)
+    @Step("PUT To album with ID: \"{0}\" updated parameters")
+    public static CommonResponseWithBooleanData putUpdatedParams(String myAlbumId) {
+        return given()
+                .spec(requestSpecificationForPutNewAlbumInfo)
                 .log().all()
                 .expect()
-                .body("data", is(true))
-                .body("success", is(true))
-                .body("status", is(200))
+                .spec(positiveResponseSpecification)
                 .when()
-                .put("https://api.imgur.com/3/album/{myAlbumId}", myAlbumId)
+                .put(ALBUM_INFO, myAlbumId)
                 .prettyPeek()
                 .then()
-                .statusCode(200);
+                .extract()
+                .body().as(CommonResponseWithBooleanData.class);
     }
 
-    @Step("DELETE Album with ID: \"{1}\" ")
-    public static void deleteAlbum(Map<String, String> headers, String myAlbumId) {
-        given()
-                .headers(headers)
+    @Step("DELETE Album with ID: \"{0}\" ")
+    public static CommonResponseWithBooleanData deleteAlbum(String myAlbumId) {
+        return given()
+                .spec(requestSpecificationWithAuth)
                 .log().all()
                 .expect()
-                .body("data", is(true))
-                .body("success", is(true))
-                .body("status", is(200))
+                .spec(positiveResponseSpecification)
                 .when()
-                .delete("https://api.imgur.com/3/album/{myAlbumId}", myAlbumId)
+                .delete(ALBUM_INFO, myAlbumId)
                 .prettyPeek()
                 .then()
-                .statusCode(200);
+                .extract()
+                .body().as(CommonResponseWithBooleanData.class);
     }
 }

@@ -7,9 +7,6 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import org.junit.jupiter.api.BeforeAll;
-import ru.geekbrains.autotest.utils.PropertiesProvider;
-
-import java.util.Properties;
 
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.Matchers.equalTo;
@@ -19,7 +16,6 @@ import static ru.geekbrains.autotest.utils.Endpoints.URI;
 public abstract class BaseTest {
     static ResponseSpecification positiveResponseSpecification;
     static RequestSpecification requestSpecificationWithAuth;
-    static Properties properties;
     static String token;
     static String username;
 
@@ -29,7 +25,7 @@ public abstract class BaseTest {
         RestAssured.filters(new AllureRestAssured());
         RestAssured.baseURI = String.valueOf(URI);
         token = "Bearer " + System.getProperty("token");
-        properties = PropertiesProvider.getProperties("src/test/resources/test_data.properties");
+        username = System.getProperty("username");
 
         positiveResponseSpecification = new ResponseSpecBuilder()
                 .expectBody("status", equalTo(200))
@@ -43,7 +39,4 @@ public abstract class BaseTest {
                 .build();
 
     }
-
-
-
 }
